@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: products-service
+
+server:
+  port: ${PORT:0}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+configserver:
+  name: Registry
+  status: Connected to the Registry

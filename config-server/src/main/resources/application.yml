@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri:
+
+server:
+  port: 8888
+
+configserver:
+  name: Registry
+  status: Connected to the Registry

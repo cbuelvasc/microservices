@@ -1,0 +1,59 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: products-service
+        uri: lb://products-service
+        predicates:
+          - Path=/api/products/**
+        filters:
+          - StripPrefix=2
+          - EjemploCookie=Hola mi mensaje personalizado, usuario, CBC
+      - id: items-service
+        uri: lb://items-service
+        predicates:
+          - Path=/api/items/**
+        filters:
+          - name: CircuitBreaker
+            args:
+              name: products
+              statusCodes: 500
+              fallbackUri: forward:/api/items/9/quantity/5
+          - StripPrefix=2
+          - AddRequestHeader=token-request, 123456
+          - AddResponseHeader=token-response, 12345678
+          - SetResponseHeader=Content-Type, application/json
+          - AddRequestParameter=nombre, CBC
+  application:
+    name: gateway-server
+
+server:
+  port: 8090
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      defecto:
+        sliding-window-size: 6
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 4
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold: 2s
+    instances:
+      products:
+        base-config: defecto
+  timelimiter:
+    configs:
+      defecto:
+        timeout-duration: 2s
+    instances:
+      products:
+        base-config: defecto
